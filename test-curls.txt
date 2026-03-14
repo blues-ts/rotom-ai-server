@@ -1,0 +1,125 @@
+## ========================================
+## rotom-ai-server — Test Curls (Dev Mode)
+## ========================================
+## Make sure the server is running: bun run dev
+## All routes bypass auth in dev (NODE_ENV != production)
+
+# ------------------------------------------
+# HEALTH
+# ------------------------------------------
+
+# Health check
+curl http://localhost:3001/api/health
+
+# Liveness probe
+curl http://localhost:3001/api/health/live
+
+# Readiness probe
+curl http://localhost:3001/api/health/ready
+
+# ------------------------------------------
+# CHAT (AI Streaming)
+# ------------------------------------------
+
+# Simple question (no tools needed)
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"What is the most valuable Pokemon card ever sold?"}]}'
+
+# Search for a specific card (triggers searchCard tool)
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"How much is a base set Charizard worth?"}]}'
+
+# Price comparison (triggers searchCard + getCardPricing tools)
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Compare the price of Pikachu VMAX from Vivid Voltage vs the Pikachu Illustrator promo"}]}'
+
+# Market analysis (triggers searchCard + analyzeMarket tools)
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Should I buy or sell a PSA 10 Umbreon VMAX alt art right now? Give me a full market analysis."}]}'
+
+# Set overview (triggers searchCard with set filter)
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"What are the most valuable cards in the Paldean Fates set?"}]}'
+
+# Grading advice (triggers searchCard + analyzeMarket tools)
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Is it worth grading a near mint Mew ex from Paldean Fates?"}]}'
+
+# Multi-turn conversation
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Look up Charizard ex from Obsidian Flames"},{"role":"assistant","content":"I found the card. What would you like to know?"},{"role":"user","content":"Show me the price history for the last 90 days"}]}'
+
+# ------------------------------------------
+# CARDS (Image Analysis)
+# ------------------------------------------
+
+# Analyze a test card image (Base Set Alakazam)
+curl -X POST http://localhost:3001/api/cards/analyze-card \
+  -H "Content-Type: application/json" \
+  -d '{"testImage":"baseSet"}'
+
+# Analyze test card (Scarlet & Violet era)
+curl -X POST http://localhost:3001/api/cards/analyze-card \
+  -H "Content-Type: application/json" \
+  -d '{"testImage":"scarletViolet"}'
+
+# Analyze test card (Sword & Shield era)
+curl -X POST http://localhost:3001/api/cards/analyze-card \
+  -H "Content-Type: application/json" \
+  -d '{"testImage":"swordShield"}'
+
+# Analyze test card (XY era)
+curl -X POST http://localhost:3001/api/cards/analyze-card \
+  -H "Content-Type: application/json" \
+  -d '{"testImage":"xy"}'
+
+# ------------------------------------------
+# PRICING (Poketrace API)
+# ------------------------------------------
+
+# Search cards by name
+curl "http://localhost:3001/api/pricing/cards?search=charizard&limit=5"
+
+# Search cards by set
+curl "http://localhost:3001/api/pricing/cards?set=base-set&limit=10"
+
+# Search cards by name + set
+curl "http://localhost:3001/api/pricing/cards?search=pikachu&set=scarlet-violet-151&limit=5"
+
+# Get single card detail (replace CARD_ID with a real ID from search results)
+curl "http://localhost:3001/api/pricing/cards/CARD_ID"
+
+# Get price history for a card (replace CARD_ID)
+curl "http://localhost:3001/api/pricing/cards/CARD_ID/history/NEAR_MINT?period=30d"
+
+# Get price history for graded card (replace CARD_ID)
+curl "http://localhost:3001/api/pricing/cards/CARD_ID/history/PSA_10?period=90d"
+
+# Get sold listings (replace CARD_ID, Scale plan only)
+curl "http://localhost:3001/api/pricing/cards/CARD_ID/listings?limit=10&sort=sold_at_desc"
+
+# List all sets
+curl "http://localhost:3001/api/pricing/sets?limit=20"
+
+# Search sets by name
+curl "http://localhost:3001/api/pricing/sets?search=paldean"
+
+# Get single set detail
+curl "http://localhost:3001/api/pricing/sets/base-set"
+
+# API key pool stats
+curl "http://localhost:3001/api/pricing/pool/stats"
+
+# ------------------------------------------
+# Available testImage keys for analyze-card:
+# ------------------------------------------
+# baseSet, jungle, neoGenesis, gymHeroes, aquapolis,
+# rubySapphire, diamondPearl, platinum, heartGoldSoulSilver,
+# blackWhite, xy, sunMoon, swordShield, scarletViolet
