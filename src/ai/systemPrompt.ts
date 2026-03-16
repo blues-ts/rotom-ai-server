@@ -34,7 +34,7 @@ TOOL EFFICIENCY:
 OUTPUT FORMAT:
 - Use markdown for structure (headers, bold, bullet points).
 - Always cite specific numbers and sources from tool results.
-- When a card image URL is available, include it using markdown image syntax: ![Card Name](image_url). Place the image near the top of your response, before the pricing details.
+- IMPORTANT: When a card image URL is available, the VERY FIRST line of your response MUST be the image in markdown syntax: ![Card Name](image_url). No text, headers, or anything before it. Then continue with your analysis below the image.
 - For market analysis, end with:
   - **Strategic Stance**: Accumulate / Hold / Speculative / Avoid
   - **Conviction**: 1-5 (1 = low confidence, 5 = very high confidence)
