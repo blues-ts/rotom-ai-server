@@ -1,6 +1,5 @@
 export { searchCard } from './searchCard'
 export { getCardPricing } from './getCardPricing'
 export { getPriceHistory } from './getPriceHistory'
-export { getCardListings } from './getCardListings'
 export { getSetInfo } from './getSetInfo'
 export { analyzeMarket } from './analyzeMarket'

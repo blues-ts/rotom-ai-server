@@ -3,7 +3,7 @@ import { streamText, stepCountIs } from 'ai'
 import type { AuthRequest } from '../middleware/clerkAuth'
 import { getModel } from '../ai/provider'
 import { SYSTEM_PROMPT } from '../ai/systemPrompt'
-import { searchCard, getCardPricing, getPriceHistory, getCardListings, getSetInfo, analyzeMarket } from '../ai/tools'
+import { searchCard, getCardPricing, getPriceHistory, getSetInfo, analyzeMarket } from '../ai/tools'
 import { config } from '../config'
 import { logger } from '../utils/logger'
 
@@ -29,12 +29,21 @@ export async function streamChat(req: AuthRequest, res: Response) {
         searchCard,
         getCardPricing,
         getPriceHistory,
-        getCardListings,
         getSetInfo,
         analyzeMarket,
       },
       stopWhen: stepCountIs(config.ai.maxSteps),
       maxOutputTokens: config.ai.maxTokens,
+      onStepFinish: ({ toolResults }) => {
+        if (toolResults && toolResults.length > 0) {
+          for (const toolResult of toolResults) {
+            const { toolName, args, result } = toolResult
+            console.log(`\n🔧 Tool Call: ${toolName}`)
+            console.log('  Args:', JSON.stringify(args, null, 2).replace(/\n/g, '\n  '))
+            console.log('  Result:', JSON.stringify(result, null, 2).replace(/\n/g, '\n  '))
+          }
+        }
+      },
       onFinish: ({ text, usage }) => {
         const inputTokens = usage.inputTokens || 0
         const outputTokens = usage.outputTokens || 0

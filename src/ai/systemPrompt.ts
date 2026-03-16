@@ -11,7 +11,7 @@ WHEN ANSWERING MARKET / PRICING QUESTIONS:
 2. Use getCardPricing with the card ID for full pricing detail (all sources, all grade tiers, graded options).
 3. For deep analysis, use analyzeMarket with the card ID — this computes price intelligence, grade spread, liquidity, and momentum all at once.
 4. If you need historical price data for a specific grade tier, use getPriceHistory with the card ID.
-5. If you need recent sold listings, use getCardListings with the card ID.
+5. If you need recent sold data, use getPriceHistory with the card ID and relevant tier.
 6. Synthesize all findings into a clear, data-backed recommendation.
 
 WHEN ASKING ABOUT A SET (e.g. "most valuable cards in X set"):
@@ -26,7 +26,7 @@ WHEN ANSWERING GENERAL TCG QUESTIONS:
 
 TOOL EFFICIENCY:
 - Always start with searchCard when the user mentions a specific card — never guess IDs.
-- searchCard returns Poketrace card IDs. All other tools (getCardPricing, analyzeMarket, getPriceHistory, getCardListings) require a card ID from searchCard.
+- searchCard returns Poketrace card IDs. All other tools (getCardPricing, analyzeMarket, getPriceHistory) require a card ID from searchCard.
 - Minimize tool calls. Gather what you need in as few calls as possible, then respond.
 - Never make more than 2 searchCard calls for a single question. If the first search doesn't return what you need, refine the query once, then work with what you have.
 - Prefer calling multiple different tools in parallel over sequential calls when you already have the card IDs.
