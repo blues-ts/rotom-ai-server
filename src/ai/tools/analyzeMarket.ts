@@ -18,8 +18,10 @@ interface GradeSpread {
   psa9Premium: number | null
   psa10Premium: number | null
   gradingCost: number
-  estimatedRoi9: number | null
-  estimatedRoi10: number | null
+  estimatedProfit9: number | null
+  estimatedProfit10: number | null
+  estimatedRoiPercent9: number | null
+  estimatedRoiPercent10: number | null
   recommendation: string
 }
 
@@ -162,8 +164,10 @@ export const analyzeMarket = tool({
         psa9Premium: rawPrice && psa9Price ? Math.round(((psa9Price - rawPrice) / rawPrice) * 100) : null,
         psa10Premium: rawPrice && psa10Price ? Math.round(((psa10Price - rawPrice) / rawPrice) * 100) : null,
         gradingCost,
-        estimatedRoi9: rawPrice && psa9Price ? Math.round((psa9Price - rawPrice - gradingCost) * 100) / 100 : null,
-        estimatedRoi10: rawPrice && psa10Price ? Math.round((psa10Price - rawPrice - gradingCost) * 100) / 100 : null,
+        estimatedProfit9: rawPrice && psa9Price ? Math.round((psa9Price - rawPrice - gradingCost) * 100) / 100 : null,
+        estimatedProfit10: rawPrice && psa10Price ? Math.round((psa10Price - rawPrice - gradingCost) * 100) / 100 : null,
+        estimatedRoiPercent9: rawPrice && psa9Price ? Math.round(((psa9Price - rawPrice - gradingCost) / (rawPrice + gradingCost)) * 10000) / 100 : null,
+        estimatedRoiPercent10: rawPrice && psa10Price ? Math.round(((psa10Price - rawPrice - gradingCost) / (rawPrice + gradingCost)) * 10000) / 100 : null,
         recommendation:
           rawPrice && psa10Price && psa10Price - rawPrice - gradingCost > rawPrice * 0.3
             ? 'Grade — significant upside potential'
