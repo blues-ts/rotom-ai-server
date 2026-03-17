@@ -143,8 +143,8 @@ class PoketraceClient {
     const cacheKey = buildCacheKey(path, params);
     const cached = await redisCache.get<T>(cacheKey);
     if (cached !== undefined) {
-      console.log(`\n📡 Poketrace API: GET ${path} (cached)`)
-      console.log('  Response:', JSON.stringify(cached, null, 2).replace(/\n/g, '\n  '))
+      const cachedQueryString = params ? '?' + Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}=${v}`).join('&') : ''
+      console.log(`\n📡 Poketrace API: GET ${this.baseUrl}${path}${cachedQueryString} (cached)`)
       return cached;
     }
 
@@ -161,11 +161,8 @@ class PoketraceClient {
 
       await redisCache.set(cacheKey, response.data, CACHE_TTL);
 
-      console.log(`\n📡 Poketrace API: GET ${path}`)
-      if (params && Object.keys(params).length > 0) {
-        console.log('  Params:', JSON.stringify(params))
-      }
-      console.log('  Response:', JSON.stringify(response.data, null, 2).replace(/\n/g, '\n  '))
+      const queryString = params ? '?' + Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}=${v}`).join('&') : ''
+      console.log(`\n📡 Poketrace API: GET ${this.baseUrl}${path}${queryString}`)
 
       return response.data;
     } catch (error) {
