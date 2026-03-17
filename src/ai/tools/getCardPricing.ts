@@ -12,7 +12,7 @@ const parameters = z.object({
 function summarizePrices(prices: any): Record<string, any> {
   const summary: Record<string, any> = {}
 
-  for (const source of ['ebay', 'tcgplayer', 'cardmarket']) {
+  for (const source of ['tcgplayer', 'ebay']) {
     const sourceData = prices?.[source]
     if (!sourceData) continue
 

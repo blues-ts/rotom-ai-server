@@ -16,7 +16,7 @@ const parameters = z.object({
  * Extract a single representative price from the prices object
  */
 function summarizePrice(prices: any): { avgPrice: number | null; source: string | null } {
-  for (const source of ['ebay', 'tcgplayer', 'cardmarket']) {
+  for (const source of ['tcgplayer', 'ebay']) {
     const sourceData = prices?.[source]
     if (!sourceData) continue
     // Try NEAR_MINT first, then AGGREGATED, then first available tier

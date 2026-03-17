@@ -41,7 +41,7 @@ interface Momentum {
 }
 
 function extractTierPrice(card: PoketraceCardDetail, tier: string): PoketraceTierPrice | null {
-  for (const source of ['ebay', 'tcgplayer'] as const) {
+  for (const source of ['tcgplayer', 'ebay'] as const) {
     const sourceData = card.prices[source]
     if (sourceData && sourceData[tier]) {
       return sourceData[tier]
@@ -128,15 +128,10 @@ export const analyzeMarket = tool({
 
       // --- Price Intelligence ---
       const sources: Record<string, { avg: number; saleCount: number }> = {}
-      for (const source of ['ebay', 'tcgplayer', 'cardmarket'] as const) {
+      for (const source of ['tcgplayer', 'ebay'] as const) {
         const sourceData = card.prices[source]
         if (!sourceData) continue
-        let tier: PoketraceTierPrice | undefined
-        if (source === 'cardmarket') {
-          tier = (sourceData as { AGGREGATED: PoketraceTierPrice }).AGGREGATED
-        } else {
-          tier = (sourceData as Record<string, PoketraceTierPrice>)['NEAR_MINT']
-        }
+        const tier = (sourceData as Record<string, PoketraceTierPrice>)['NEAR_MINT']
         if (tier) {
           sources[source] = { avg: tier.avg, saleCount: tier.saleCount ?? 0 }
         }
