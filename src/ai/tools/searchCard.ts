@@ -4,9 +4,8 @@ import { poketraceClient } from '../../utils/poketraceClient'
 import { getSlugsForSet } from '../setSlugs'
 
 const parameters = z.object({
-  query: z.string().optional().describe('Card name or search term (e.g. "Charizard", "Pikachu VMAX"). Optional — omit to browse by set or rarity.'),
+  query: z.string().optional().describe('Card name or search term (e.g. "Charizard", "Pikachu VMAX"). Include card number in the query if needed (e.g. "Mew ex 232"). Optional — omit to browse by set or rarity.'),
   set: z.string().optional().describe('Filter by set name. Use the exact set names from the system prompt reference (e.g. "Paldean Fates", "Brilliant Stars"). The tool automatically queries all slug variations for the set.'),
-  cardNumber: z.string().optional().describe('Filter by card number (e.g. "4/102")'),
   rarity: z.string().optional().describe('Filter by rarity'),
   limit: z.number().optional().default(10).describe('Max results to return (default 10, max 20)'),
   sortByPrice: z.enum(['desc', 'asc']).optional().describe('Sort results by price. Use "desc" for most expensive first, "asc" for cheapest first. When set, fetches ALL cards in the set and sorts by price.'),
@@ -56,7 +55,6 @@ export const searchCard = tool({
             const page = await poketraceClient.getCards({
               ...(args.query ? { search: args.query } : {}),
               set: setSlug,
-              ...(args.cardNumber ? { card_number: args.cardNumber } : {}),
               ...(args.rarity ? { rarity: args.rarity } : {}),
               limit: PAGE_SIZE,
               ...(cursor ? { cursor } : {}),
@@ -111,7 +109,6 @@ export const searchCard = tool({
       const result = await poketraceClient.getCards({
         ...(args.query ? { search: args.query } : {}),
         ...(setSlugs.length > 0 ? { set: setSlugs[0] } : {}),
-        ...(args.cardNumber ? { card_number: args.cardNumber } : {}),
         ...(args.rarity ? { rarity: args.rarity } : {}),
         limit: returnLimit,
       })

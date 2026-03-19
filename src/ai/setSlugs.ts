@@ -241,6 +241,13 @@ export function getSlugsForSet(setName: string): string[] {
     }
   }
 
+  // Reverse lookup: input might be a raw slug — find which set it belongs to
+  for (const [, slugs] of Object.entries(SET_SLUG_MAP)) {
+    if (slugs.includes(setName) || slugs.includes(lower)) {
+      return slugs
+    }
+  }
+
   // Fallback: treat input as a raw slug
   return [setName]
 }

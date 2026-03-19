@@ -138,13 +138,21 @@ class PoketraceClient {
     });
   }
 
+  private buildUrl(path: string, params?: Record<string, unknown>): string {
+    const queryString = params
+      ? '?' + Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}=${v}`).join('&')
+      : '';
+    return `${this.baseUrl}${path}${queryString}`;
+  }
+
   private async request<T>(method: 'get', path: string, params?: Record<string, unknown>): Promise<T> {
+    const url = this.buildUrl(path, params);
+
     // Check cache first
     const cacheKey = buildCacheKey(path, params);
     const cached = await redisCache.get<T>(cacheKey);
     if (cached !== undefined) {
-      const cachedQueryString = params ? '?' + Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}=${v}`).join('&') : ''
-      console.log(`\n📡 Poketrace API: GET ${this.baseUrl}${path}${cachedQueryString} (cached)`)
+      console.log(`📡 GET ${url} (cached)`);
       return cached;
     }
 
@@ -152,6 +160,7 @@ class PoketraceClient {
     const client = this.createAxios(apiKey);
 
     try {
+      console.log(`📡 GET ${url}`);
       const response = await client.get<T>(path, { params });
 
       const remaining = response.headers['x-ratelimit-remaining'];
@@ -159,10 +168,12 @@ class PoketraceClient {
         logger.warn(`Poketrace key ...${apiKey.slice(-6)} has ${remaining} requests remaining`);
       }
 
-      await redisCache.set(cacheKey, response.data, CACHE_TTL);
-
-      const queryString = params ? '?' + Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}=${v}`).join('&') : ''
-      console.log(`\n📡 Poketrace API: GET ${this.baseUrl}${path}${queryString}`)
+      // Don't cache empty search results — they may be due to bad filters
+      const data = response.data as any;
+      const isEmpty = data?.data && Array.isArray(data.data) && data.data.length === 0;
+      if (!isEmpty) {
+        await redisCache.set(cacheKey, response.data, CACHE_TTL);
+      }
 
       return response.data;
     } catch (error) {
@@ -170,10 +181,11 @@ class PoketraceClient {
         const status = error.response.status;
         const body = error.response.data as PoketraceErrorResponse;
 
+        console.error(`❌ GET ${url} → ${status}:`, body.error || body);
+
         if (status === 429) {
           const retryAfter = (body.retryAfter ?? 10) * 1000;
           this.pool.markRateLimited(apiKey, retryAfter);
-          // Retry with a different key
           return this.request(method, path, params);
         }
 
@@ -183,6 +195,8 @@ class PoketraceClient {
           body.code
         );
       }
+
+      console.error(`❌ GET ${url} →`, error instanceof Error ? error.message : error);
       throw new PoketraceApiError(
         error instanceof Error ? error.message : 'Poketrace API request failed',
         500
