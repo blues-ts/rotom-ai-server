@@ -104,11 +104,48 @@ export const searchCard = tool({
         }))
       }
 
-      // Default: simple search without sorting
-      // Use the first slug if a set was provided, otherwise no set filter
+      // Default: search without sorting
+      // Search all slug variations for the set to avoid missing cards
+      if (setSlugs.length > 1) {
+        const allCards: any[] = []
+        for (const slug of setSlugs) {
+          const result = await poketraceClient.getCards({
+            ...(args.query ? { search: args.query } : {}),
+            set: slug,
+            ...(args.rarity ? { rarity: args.rarity } : {}),
+            limit: returnLimit,
+          })
+          allCards.push(...result.data)
+        }
+
+        const uniqueCards = new Map<string, any>()
+        for (const card of allCards) {
+          if (isActualCard(card) && !uniqueCards.has(card.id)) {
+            uniqueCards.set(card.id, card)
+          }
+        }
+
+        return [...uniqueCards.values()].slice(0, returnLimit).map((card) => {
+          const { avgPrice, source } = summarizePrice(card.prices)
+          return {
+            id: card.id,
+            name: card.name,
+            cardNumber: card.cardNumber,
+            set: card.set,
+            variant: card.variant,
+            rarity: card.rarity,
+            image: card.image,
+            currency: card.currency,
+            avgPrice,
+            priceSource: source,
+            lastUpdated: card.lastUpdated,
+          }
+        })
+      }
+
       const result = await poketraceClient.getCards({
         ...(args.query ? { search: args.query } : {}),
-        ...(setSlugs.length > 0 ? { set: setSlugs[0] } : {}),
+        ...(setSlugs.length === 1 ? { set: setSlugs[0] } : {}),
         ...(args.rarity ? { rarity: args.rarity } : {}),
         limit: returnLimit,
       })

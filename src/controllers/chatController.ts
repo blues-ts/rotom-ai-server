@@ -3,7 +3,7 @@ import { streamText, stepCountIs } from 'ai'
 import type { AuthRequest } from '../middleware/clerkAuth'
 import { getModel } from '../ai/provider'
 import { SYSTEM_PROMPT } from '../ai/systemPrompt'
-import { searchCard, getCardPricing, getPriceHistory, getSetInfo, analyzeMarket } from '../ai/tools'
+import { searchCard, searchSealedProduct, getCardPricing, getPriceHistory, getSetInfo, analyzeMarket } from '../ai/tools'
 import { config } from '../config'
 import { logger } from '../utils/logger'
 
@@ -27,6 +27,7 @@ export async function streamChat(req: AuthRequest, res: Response) {
       messages,
       tools: {
         searchCard,
+        searchSealedProduct,
         getCardPricing,
         getPriceHistory,
         getSetInfo,

@@ -1,4 +1,5 @@
 export { searchCard } from './searchCard'
+export { searchSealedProduct } from './searchSealedProduct'
 export { getCardPricing } from './getCardPricing'
 export { getPriceHistory } from './getPriceHistory'
 export { getSetInfo } from './getSetInfo'
