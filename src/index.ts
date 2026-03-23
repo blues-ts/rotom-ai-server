@@ -37,13 +37,24 @@ app.use('/api/chat', chatRouter);
 app.use(errorHandler);
 
 // Graceful shutdown handler
+let isShuttingDown = false;
 const gracefulShutdown = async (signal: string) => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
   logger.info(`Received ${signal}, starting graceful shutdown...`);
+
+  // Force exit after timeout
+  setTimeout(() => {
+    process.exit(1);
+  }, 10000);
 
   // Stop accepting new requests
   if (server) {
-    server.close(() => {
-      logger.info('HTTP server closed');
+    await new Promise<void>((resolve) => {
+      server.close(() => {
+        logger.info('HTTP server closed');
+        resolve();
+      });
     });
   }
 
@@ -59,12 +70,6 @@ const gracefulShutdown = async (signal: string) => {
   logger.end(() => {
     process.exit(0);
   });
-
-  // Force exit after timeout
-  setTimeout(() => {
-    logger.error('Forced shutdown after timeout');
-    process.exit(1);
-  }, 10000);
 };
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
